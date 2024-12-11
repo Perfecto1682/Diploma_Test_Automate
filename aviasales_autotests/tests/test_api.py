@@ -1,49 +1,106 @@
-import requests
 import allure
-from ..config.settings import BASE_URL_API, API_KEY
+import requests
 
-# Feature: Получение данных о рейсах — Позитивный тест
-@allure.feature("API Tests")
-@allure.story("Получение данных о рейсах — Позитивный тест")
-def test_api_get_flights():
-    params = {"origin": "MOW", "destination": "LED"}
-    headers = {"Authorization": f"Bearer {API_KEY}"}
-    response = requests.get(f"{BASE_URL_API}/v1/search", params=params, headers=headers)  # Убедитесь, что используете правильную конечную точку
-    assert response.status_code == 200, f"API вернул ошибку: {response.status_code}"
-    assert "data" in response.json(), "Ответ не содержит данных о рейсах"
+baseURL_api = "https://min-prices.aviasales.ru/price_matrix?"
+my_headers = {
+    "Content-Type": "application/json"
+}
 
-# Негативный тест
-@allure.story("Получение данных о рейсах — Негативный тест")
-def test_api_invalid_request():
-    params = {"origin": "XXX", "destination": "YYY"}
-    headers = {"Authorization": f"Bearer {API_KEY}"}
-    response = requests.get(f"{BASE_URL_API}/v1/search", params=params, headers=headers)  # Правильная конечная точка
-    assert response.status_code == 200, f"API вернул ошибку: {response.status_code}"
-    assert len(response.json().get("data", [])) == 0, "Рейсы найдены, хотя не должны"
+@allure.title("Поиск билета в одну сторону - позитивная проверка")
+@allure.feature("GET")
+@allure.severity("blocker")
+def test_get_oneway_positive() -> str:
+    city1 = "MOW"
+    city2 = "STW"
+    date = "2024-12-15"
+    with allure.step("Получение списка билетов в одну сторону"):
+        tickets_list = requests.get(baseURL_api + f'origin_iata={city1}&destination_iata={city2}&depart_start={date}&depart_range=6&return_range=6&affiliate=false&market=ru', headers=my_headers)
 
-# Позитивный тест: Фильтрация по времени
-@allure.story("Фильтрация рейсов по времени — Позитивный тест")
-def test_api_filter_by_time():
-    params = {"origin": "MOW", "destination": "LED", "departure_time": "morning"}
-    headers = {"Authorization": f"Bearer {API_KEY}"}
-    response = requests.get(f"{BASE_URL_API}/v1/search", params=params, headers=headers)  # Правильная конечная точка
-    assert response.status_code == 200, f"API вернул ошибку: {response.status_code}"
-    flights = response.json().get("data", [])
-    assert all(flight["departure_time"] == "morning" for flight in flights), "Фильтр по времени не сработал"
+    lst = tickets_list.json()
 
-# Негативный тест: Пустые параметры
-@allure.story("Проверка с пустыми параметрами — Негативный тест")
-def test_api_empty_params():
-    headers = {"Authorization": f"Bearer {API_KEY}"}
-    response = requests.get(f"{BASE_URL_API}/v1/search", params={}, headers=headers)  # Правильная конечная точка
-    assert response.status_code == 400, f"API не вернул ошибку на пустые параметры: {response.status_code}"
+    with allure.step("Проверка"):
+        assert len(lst) > 0, "Результаты поиска не найдены"
 
-# Сложный запрос: рейсы с пересадками
-@allure.story("Сложный запрос: рейсы с пересадками — Позитивный тест")
-def test_api_complex_request_with_transfers():
-    params = {"origin": "MOW", "destination": "LED", "transfers": "1"}
-    headers = {"Authorization": f"Bearer {API_KEY}"}
-    response = requests.get(f"{BASE_URL_API}/v1/search", params=params, headers=headers)  # Правильная конечная точка
-    assert response.status_code == 200, f"API вернул ошибку: {response.status_code}"
-    flights = response.json().get("data", [])
-    assert all(flight.get("transfers") == 1 for flight in flights), "Фильтр по пересадкам не работает"
+
+@allure.title("Поиск билета в одну сторону с некорректными параметрами - негативная проверка")
+@allure.feature("GET")
+@allure.severity("blocker")
+def test_get_oneway_negative() -> str:
+    city1 = "MOW"
+    city2 = "XXX"  # Некорректный город
+    date = "2024-12-15"
+    with allure.step("Получение списка билетов с некорректными параметрами"):
+        tickets_list = requests.get(baseURL_api + f'origin_iata={city1}&destination_iata={city2}&depart_start={date}&depart_range=6&return_range=6&affiliate=false&market=ru', headers=my_headers)
+
+    lst = tickets_list.json()
+
+    with allure.step("Проверка наличия ошибки для некорректного города"):
+        assert 'errors' in lst, "Ошибки не найдены для некорректного города"
+        assert lst['errors'].get('destination_iata') == 'Unknown city iata: "XXX", try \'MOW\'', f"Ошибка: {lst['errors'].get('destination_iata')}"
+
+
+@allure.title("Поиск билета с корректной датой - позитивная проверка")
+@allure.feature("GET")
+@allure.severity("normal")
+def test_get_oneway_date_positive() -> str:
+    city1 = "MOW"
+    city2 = "STW"
+    date = "2024-12-15"  # Корректная дата
+    with allure.step("Получение списка билетов с корректной датой"):
+        tickets_list = requests.get(baseURL_api + f'origin_iata={city1}&destination_iata={city2}&depart_start={date}&depart_range=6&return_range=6&affiliate=false&market=ru', headers=my_headers)
+
+    # Проверяем статус ответа
+    assert tickets_list.status_code == 200, f"Ошибка при запросе: {tickets_list.status_code}"
+
+    lst = tickets_list.json()
+
+    with allure.step("Вывод данных ответа для анализа структуры"):
+        print(lst)  # Это поможет вам понять структуру данных и найти нужные поля
+
+    with allure.step("Проверка наличия данных в ответе"):
+        # Проверка, что в ответе есть хотя бы один билет
+        assert len(lst['prices']) > 0, "Список билетов пуст"
+
+    with allure.step("Проверка правильности данных о билетах"):
+        # Проверяем, что каждый элемент в списке содержит необходимые данные
+        for ticket in lst['prices']:
+            assert 'value' in ticket, "Отсутствует цена в билете"
+            assert 'depart_date' in ticket, "Отсутствует дата вылета в билете"
+            assert 'gate' in ticket, "Отсутствует информация о gate в билете"
+
+
+
+
+
+
+@allure.title("Поиск билета туда и обратно - позитивная проверка")
+@allure.feature("GET")
+@allure.severity("normal")
+def test_get_roundtrip_positive() -> str:
+    city1 = "MOW"
+    city2 = "STW"
+    date = "2024-12-15"
+    return_date = "2024-12-22"
+    with allure.step("Получение списка билетов туда и обратно"):
+        tickets_list = requests.get(baseURL_api + f'origin_iata={city1}&destination_iata={city2}&depart_start={date}&depart_range=6&return_start={return_date}&return_range=6&affiliate=false&market=ru', headers=my_headers)
+
+    lst = tickets_list.json()
+
+    with allure.step("Проверка"):
+        assert len(lst) > 0, "Результаты поиска не найдены для билетов туда и обратно"
+
+
+@allure.title("Поиск билета с параметрами по умолчанию - позитивная проверка")
+@allure.feature("GET")
+@allure.severity("blocker")
+def test_get_default_search() -> str:
+    city1 = "MOW"
+    city2 = "STW"
+    date = "2024-12-15"
+    with allure.step("Получение списка билетов с параметрами по умолчанию"):
+        tickets_list = requests.get(baseURL_api + f'origin_iata={city1}&destination_iata={city2}&depart_start={date}&depart_range=6&return_range=6&affiliate=false&market=ru', headers=my_headers)
+
+    lst = tickets_list.json()
+
+    with allure.step("Проверка"):
+        assert len(lst) > 0, "Результаты поиска не найдены с параметрами по умолчанию"
