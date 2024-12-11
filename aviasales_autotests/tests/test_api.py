@@ -1,10 +1,11 @@
 import allure
 import requests
 
-baseURL_api = "https://min-prices.aviasales.ru/price_matrix?"
-my_headers = {
+BASE_URL_API = "https://min-prices.aviasales.ru/price_matrix?"
+MY_HEADERS = {
     "Content-Type": "application/json"
 }
+
 
 @allure.title("Поиск билета в одну сторону - позитивная проверка")
 @allure.feature("GET")
@@ -14,7 +15,11 @@ def test_get_oneway_positive() -> str:
     city2 = "STW"
     date = "2024-12-15"
     with allure.step("Получение списка билетов в одну сторону"):
-        tickets_list = requests.get(baseURL_api + f'origin_iata={city1}&destination_iata={city2}&depart_start={date}&depart_range=6&return_range=6&affiliate=false&market=ru', headers=my_headers)
+        tickets_list = requests.get(
+            BASE_URL_API + f'origin_iata={city1}&destination_iata={city2}&'
+                           f'depart_start={date}&depart_range=6&return_range=6&affiliate=false&market=ru',
+            headers=MY_HEADERS
+        )
 
     lst = tickets_list.json()
 
@@ -30,13 +35,18 @@ def test_get_oneway_negative() -> str:
     city2 = "XXX"  # Некорректный город
     date = "2024-12-15"
     with allure.step("Получение списка билетов с некорректными параметрами"):
-        tickets_list = requests.get(baseURL_api + f'origin_iata={city1}&destination_iata={city2}&depart_start={date}&depart_range=6&return_range=6&affiliate=false&market=ru', headers=my_headers)
+        tickets_list = requests.get(
+            BASE_URL_API + f'origin_iata={city1}&destination_iata={city2}&depart_start={date}'
+                           f'&depart_range=6&return_range=6&affiliate=false&market=ru',
+            headers=MY_HEADERS
+        )
 
     lst = tickets_list.json()
 
     with allure.step("Проверка наличия ошибки для некорректного города"):
         assert 'errors' in lst, "Ошибки не найдены для некорректного города"
-        assert lst['errors'].get('destination_iata') == 'Unknown city iata: "XXX", try \'MOW\'', f"Ошибка: {lst['errors'].get('destination_iata')}"
+        assert lst['errors'].get('destination_iata') == 'Unknown city iata: "XXX", try \'MOW\'', \
+            f"Ошибка: {lst['errors'].get('destination_iata')}"
 
 
 @allure.title("Поиск билета с корректной датой - позитивная проверка")
@@ -47,7 +57,11 @@ def test_get_oneway_date_positive() -> str:
     city2 = "STW"
     date = "2024-12-15"  # Корректная дата
     with allure.step("Получение списка билетов с корректной датой"):
-        tickets_list = requests.get(baseURL_api + f'origin_iata={city1}&destination_iata={city2}&depart_start={date}&depart_range=6&return_range=6&affiliate=false&market=ru', headers=my_headers)
+        tickets_list = requests.get(
+            BASE_URL_API + f'origin_iata={city1}&destination_iata={city2}&depart_start={date}&depart_range=6'
+                           f'&return_range=6&affiliate=false&market=ru',
+            headers=MY_HEADERS
+        )
 
     # Проверяем статус ответа
     assert tickets_list.status_code == 200, f"Ошибка при запросе: {tickets_list.status_code}"
@@ -69,10 +83,6 @@ def test_get_oneway_date_positive() -> str:
             assert 'gate' in ticket, "Отсутствует информация о gate в билете"
 
 
-
-
-
-
 @allure.title("Поиск билета туда и обратно - позитивная проверка")
 @allure.feature("GET")
 @allure.severity("normal")
@@ -82,7 +92,11 @@ def test_get_roundtrip_positive() -> str:
     date = "2024-12-15"
     return_date = "2024-12-22"
     with allure.step("Получение списка билетов туда и обратно"):
-        tickets_list = requests.get(baseURL_api + f'origin_iata={city1}&destination_iata={city2}&depart_start={date}&depart_range=6&return_start={return_date}&return_range=6&affiliate=false&market=ru', headers=my_headers)
+        tickets_list = requests.get(
+            BASE_URL_API + f'origin_iata={city1}&destination_iata={city2}&depart_start={date}&depart_range=6'
+                           f'&return_start={return_date}&return_range=6&affiliate=false&market=ru',
+            headers=MY_HEADERS
+        )
 
     lst = tickets_list.json()
 
@@ -98,7 +112,11 @@ def test_get_default_search() -> str:
     city2 = "STW"
     date = "2024-12-15"
     with allure.step("Получение списка билетов с параметрами по умолчанию"):
-        tickets_list = requests.get(baseURL_api + f'origin_iata={city1}&destination_iata={city2}&depart_start={date}&depart_range=6&return_range=6&affiliate=false&market=ru', headers=my_headers)
+        tickets_list = requests.get(
+            BASE_URL_API + f'origin_iata={city1}&destination_iata={city2}&depart_start={date}&depart_range=6'
+                           f'&return_range=6&affiliate=false&market=ru',
+            headers=MY_HEADERS
+        )
 
     lst = tickets_list.json()
 

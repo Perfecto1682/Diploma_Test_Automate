@@ -4,6 +4,7 @@ from .base_page import BasePage
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 
+
 class SearchPage(BasePage):
     # Локаторы для элементов на странице
     FROM_FIELD = (By.CSS_SELECTOR, "input[data-test-id='origin-input']")

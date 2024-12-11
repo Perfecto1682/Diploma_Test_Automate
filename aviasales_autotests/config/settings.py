@@ -22,6 +22,7 @@ SEARCH_TERMS = {
     "invalid_date": ["2024-02-30", "2024-13-01", "2024-00-10", "2024-02-31"],
 }
 
+
 # Функция для случайного выбора значений из словаря
 def get_random_search_term(term_type):
     return random.choice(SEARCH_TERMS[term_type])
