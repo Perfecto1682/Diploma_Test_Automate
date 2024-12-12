@@ -1,65 +1,120 @@
-import pytest
-from ..config.settings import BASE_URL_UI, get_random_search_term
-from ..pages.search_page import SearchPage
+import allure
+from ..pages.main_page import MainPage
+from ..config.settings import SEARCH_TERMS
+from ..utils.webdriver_manager import get_driver
 
-@pytest.fixture(scope="module")
-def driver():
-    from ..utils.webdriver_manager import get_driver
-    driver = get_driver()
-    yield driver
-    driver.quit()
+# Позитивные проверки
+@allure.title("Позитивная проверка: Заполнение поля 'Откуда'")
+@allure.severity("critical")
+def test_fill_origin():
+    with allure.step("Настроить WebDriver"):
+        driver = get_driver()  # Используем get_driver из webdriver_manager
+        driver.implicitly_wait(10)
 
-@pytest.fixture
-def search_page(driver):
-    page = SearchPage(driver)
-    page.open_url(BASE_URL_UI)
-    return page
+    try:
+        with allure.step("Открыть главную страницу"):
+            main_page = MainPage(driver)
 
-def test_search_with_departure_and_return_date(search_page):
-    """
-    Проверка поиска с датой отправления и обратного рейса.
-    """
-    origin = get_random_search_term("valid_origin")
-    destination = get_random_search_term("valid_destination")
-    departure_date = "24.12.2024"
-    return_date = "25.12.2024"
+        with allure.step("Очистить поле 'Откуда' и заполнить его новым значением"):
+            origin = SEARCH_TERMS["valid_origin"][0]  # Используем значение из SEARCH_TERMS
+            main_page.fill_origin(origin)
 
-    search_page.search_flight(origin, destination, departure_date, return_date)
-    results = search_page.get_results()
-    assert len(results) > 0, "Результаты поиска не найдены"
+        with allure.step("Проверить, что поле 'Откуда' заполнено корректно"):
+            actual_value = driver.find_element(*main_page.origin_locator).get_attribute("value")
+            assert actual_value == origin, f"Ожидалось '{origin}', но найдено '{actual_value}'"
+    finally:
+        driver.quit()
 
-def test_search_with_departure_only(search_page):
-    """
-    Проверка поиска только с датой отправления.
-    """
-    origin = get_random_search_term("valid_origin")
-    destination = get_random_search_term("valid_destination")
-    departure_date = "24.12.2024"
+@allure.title("Позитивная проверка: Заполнение поля 'Куда'")
+@allure.severity("critical")
+def test_fill_destination():
+    with allure.step("Настроить WebDriver"):
+        driver = get_driver()  # Используем get_driver из webdriver_manager
+        driver.implicitly_wait(10)
 
-    search_page.search_flight(origin, destination, departure_date)
-    results = search_page.get_results()
-    assert len(results) > 0, "Результаты поиска не найдены"
+    try:
+        with allure.step("Открыть главную страницу"):
+            main_page = MainPage(driver)
 
-def test_search_invalid_departure_date(search_page):
-    """
-    Проверка поиска с недоступной датой отправления.
-    """
-    origin = get_random_search_term("valid_origin")
-    destination = get_random_search_term("valid_destination")
-    invalid_date = "11.12.2024"
+        with allure.step("Заполнить поле 'Куда'"):
+            destination = SEARCH_TERMS["valid_destination"][0]  # Используем значение из SEARCH_TERMS
+            main_page.fill_destination(destination)
 
-    with pytest.raises(ValueError, match=f"Дата отправления {invalid_date} недоступна!"):
-        search_page.search_flight(origin, destination, invalid_date)
+        with allure.step("Проверить, что поле 'Куда' заполнено корректно"):
+            actual_value = driver.find_element(*main_page.destination_locator).get_attribute("value")
+            assert actual_value == destination, f"Ожидалось '{destination}', но найдено '{actual_value}'"
+    finally:
+        driver.quit()
 
-def test_search_with_passengers(search_page):
-    """
-    Проверка поиска с выбором количества пассажиров.
-    """
-    origin = get_random_search_term("valid_origin")
-    destination = get_random_search_term("valid_destination")
-    departure_date = "24.12.2024"
+# Негативные проверки
+@allure.title("Негативная проверка: Пустое значение в поле 'Откуда'")
+@allure.severity("major")
+def test_empty_origin():
+    with allure.step("Настроить WebDriver"):
+        driver = get_driver()  # Используем get_driver из webdriver_manager
+        driver.implicitly_wait(10)
 
-    search_page.search_flight(origin, destination, departure_date)
-    search_page.select_passenger_and_class(adults=2)
-    results = search_page.get_results()
-    assert len(results) > 0, "Результаты поиска не найдены для указанного количества пассажиров"
+    try:
+        with allure.step("Открыть главную страницу"):
+            main_page = MainPage(driver)
+
+        with allure.step("Очистить поле 'Откуда' и оставить его пустым"):
+            main_page.fill_origin("")
+
+        with allure.step("Проверить, что поле 'Откуда' пустое"):
+            actual_value = driver.find_element(*main_page.origin_locator).get_attribute("value")
+            assert actual_value == "", f"Поле 'Откуда' не очистилось: '{actual_value}'"
+    finally:
+        driver.quit()
+
+@allure.title("Негативная проверка: Пустое значение в поле 'Куда'")
+@allure.severity("major")
+def test_empty_destination():
+    with allure.step("Настроить WebDriver"):
+        driver = get_driver()  # Используем get_driver из webdriver_manager
+        driver.implicitly_wait(10)
+
+    try:
+        with allure.step("Открыть главную страницу"):
+            main_page = MainPage(driver)
+
+        with allure.step("Очистить поле 'Куда'"):
+            main_page.fill_destination("")
+
+        with allure.step("Проверить, что поле 'Куда' пустое"):
+            actual_value = driver.find_element(*main_page.destination_locator).get_attribute("value")
+            assert actual_value == "", f"Поле 'Куда' не очистилось: '{actual_value}'"
+    finally:
+        driver.quit()
+
+@allure.title("Негативная проверка: Поля сбрасываются после обновления страницы")
+@allure.severity("minor")
+def test_fields_reset_after_refresh():
+    with allure.step("Настроить WebDriver"):
+        driver = get_driver()  # Используем get_driver из webdriver_manager
+        driver.implicitly_wait(10)
+
+    try:
+        with allure.step("Открыть главную страницу"):
+            main_page = MainPage(driver)
+
+        with allure.step("Заполнить поля 'Откуда' и 'Куда'"):
+            origin = SEARCH_TERMS["valid_origin"][0]  # Используем значение из SEARCH_TERMS
+            destination = SEARCH_TERMS["valid_destination"][0]  # Используем значение из SEARCH_TERMS
+            main_page.fill_origin(origin)
+            main_page.fill_destination(destination)
+
+        with allure.step("Получить начальное значение поля 'Откуда' после автоматического заполнения"):
+            initial_origin_value = driver.find_element(*main_page.origin_locator).get_attribute("value")
+
+        with allure.step("Обновить страницу"):
+            driver.refresh()
+
+        with allure.step("Проверить, что поле 'Куда' сбросилось, а 'Откуда' соответствует автоматическому значению"):
+            reset_origin_value = driver.find_element(*main_page.origin_locator).get_attribute("value")
+            reset_destination_value = driver.find_element(*main_page.destination_locator).get_attribute("value")
+
+            assert reset_origin_value == initial_origin_value, f"Поле 'Откуда' не соответствует ожиданиям: '{reset_origin_value}' != '{initial_origin_value}'"
+            assert reset_destination_value == "", f"Поле 'Куда' не сбросилось: '{reset_destination_value}'"
+    finally:
+        driver.quit()

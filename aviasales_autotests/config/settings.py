@@ -2,19 +2,17 @@ import os
 from dotenv import load_dotenv
 import random
 
-
 # Загружаем .env файл
 load_dotenv()
 
 # URL для UI и API
-BASE_URL_UI = os.getenv("BASE_URL_UI", "")
+BASE_URL_UI = os.getenv("BASE_URL_UI", "https://www.aviasales.ru/")
 BASE_URL_API = os.getenv("BASE_URL_API", "")
 
 # Заголовки
 MY_HEADERS = {
     "Content-Type": "application/json"
 }
-
 
 SEARCH_TERMS = {
     "valid_origin": ["Москва", "Санкт-Петербург", "Казань", "Новосибирск", "Екатеринбург"],
@@ -24,7 +22,6 @@ SEARCH_TERMS = {
     "valid_date": ["2024-12-15", "2024-12-20", "2024-12-25", "2024-12-30", "2025-01-10"],
     "invalid_date": ["2024-02-30", "2024-13-01", "2024-00-10", "2024-02-31"],
 }
-
 
 # Функция для случайного выбора значений из словаря
 def get_random_search_term(term_type):
