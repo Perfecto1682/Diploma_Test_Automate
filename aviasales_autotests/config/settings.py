@@ -7,11 +7,14 @@ import random
 load_dotenv()
 
 # URL для UI и API
-BASE_URL_UI = os.getenv("BASE_URL_UI", "https://www.aviasales.ru")
-BASE_URL_API = os.getenv("BASE_URL_API", "https://api.travelpayouts.com/aviasales/")
+BASE_URL_UI = os.getenv("BASE_URL_UI", "")
+BASE_URL_API = os.getenv("BASE_URL_API", "")
 
-# API Token для авторизации
-API_KEY = os.getenv("API_KEY", "")
+# Заголовки
+MY_HEADERS = {
+    "Content-Type": "application/json"
+}
+
 
 SEARCH_TERMS = {
     "valid_origin": ["Москва", "Санкт-Петербург", "Казань", "Новосибирск", "Екатеринбург"],
