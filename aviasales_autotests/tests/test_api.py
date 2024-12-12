@@ -1,11 +1,6 @@
 import allure
 import requests
-
-BASE_URL_API = "https://min-prices.aviasales.ru/price_matrix?"
-MY_HEADERS = {
-    "Content-Type": "application/json"
-}
-
+from ..config.settings import BASE_URL_API, MY_HEADERS
 
 @allure.title("Поиск билета в одну сторону - позитивная проверка")
 @allure.feature("GET")
@@ -18,7 +13,7 @@ def test_get_oneway_positive() -> str:
         tickets_list = requests.get(
             BASE_URL_API + f'origin_iata={city1}&destination_iata={city2}&'
                            f'depart_start={date}&depart_range=6&return_range=6&affiliate=false&market=ru',
-            headers=MY_HEADERS
+            headers=MY_HEADERS  # Используем MY_HEADERS из settings.py
         )
 
     lst = tickets_list.json()
@@ -38,7 +33,7 @@ def test_get_oneway_negative() -> str:
         tickets_list = requests.get(
             BASE_URL_API + f'origin_iata={city1}&destination_iata={city2}&depart_start={date}'
                            f'&depart_range=6&return_range=6&affiliate=false&market=ru',
-            headers=MY_HEADERS
+            headers=MY_HEADERS  # Используем MY_HEADERS из settings.py
         )
 
     lst = tickets_list.json()
@@ -60,7 +55,7 @@ def test_get_oneway_date_positive() -> str:
         tickets_list = requests.get(
             BASE_URL_API + f'origin_iata={city1}&destination_iata={city2}&depart_start={date}&depart_range=6'
                            f'&return_range=6&affiliate=false&market=ru',
-            headers=MY_HEADERS
+            headers=MY_HEADERS  # Используем MY_HEADERS из settings.py
         )
 
     # Проверяем статус ответа
@@ -95,7 +90,7 @@ def test_get_roundtrip_positive() -> str:
         tickets_list = requests.get(
             BASE_URL_API + f'origin_iata={city1}&destination_iata={city2}&depart_start={date}&depart_range=6'
                            f'&return_start={return_date}&return_range=6&affiliate=false&market=ru',
-            headers=MY_HEADERS
+            headers=MY_HEADERS  # Используем MY_HEADERS из settings.py
         )
 
     lst = tickets_list.json()
@@ -115,7 +110,7 @@ def test_get_default_search() -> str:
         tickets_list = requests.get(
             BASE_URL_API + f'origin_iata={city1}&destination_iata={city2}&depart_start={date}&depart_range=6'
                            f'&return_range=6&affiliate=false&market=ru',
-            headers=MY_HEADERS
+            headers=MY_HEADERS  # Используем MY_HEADERS из settings.py
         )
 
     lst = tickets_list.json()

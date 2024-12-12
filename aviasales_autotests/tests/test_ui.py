@@ -1,3 +1,4 @@
+
 import pytest
 from ..config.settings import BASE_URL_UI, get_random_search_term
 from ..pages.search_page import SearchPage
