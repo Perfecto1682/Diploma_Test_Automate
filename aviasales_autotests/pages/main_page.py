@@ -3,6 +3,7 @@ from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.remote.webdriver import WebDriver
 from ..config.settings import BASE_URL_UI
 
+
 class MainPage:
 
     def __init__(self, driver: WebDriver):

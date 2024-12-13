@@ -2,6 +2,7 @@ import allure
 import requests
 from ..config.settings import BASE_URL_API, MY_HEADERS
 
+
 @allure.title("Поиск билета в одну сторону - позитивная проверка")
 @allure.feature("GET")
 @allure.severity("blocker")
