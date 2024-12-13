@@ -3,6 +3,7 @@ from ..pages.main_page import MainPage
 from ..config.settings import SEARCH_TERMS
 from ..utils.webdriver_manager import get_driver
 
+
 # Позитивные проверки
 @allure.title("Позитивная проверка: Заполнение поля 'Откуда'")
 @allure.severity("critical")
@@ -25,6 +26,7 @@ def test_fill_origin():
     finally:
         driver.quit()
 
+
 @allure.title("Позитивная проверка: Заполнение поля 'Куда'")
 @allure.severity("critical")
 def test_fill_destination():
@@ -45,6 +47,7 @@ def test_fill_destination():
             assert actual_value == destination, f"Ожидалось '{destination}', но найдено '{actual_value}'"
     finally:
         driver.quit()
+
 
 # Негативные проверки
 @allure.title("Негативная проверка: Пустое значение в поле 'Откуда'")
@@ -67,6 +70,7 @@ def test_empty_origin():
     finally:
         driver.quit()
 
+
 @allure.title("Негативная проверка: Пустое значение в поле 'Куда'")
 @allure.severity("major")
 def test_empty_destination():
@@ -86,6 +90,7 @@ def test_empty_destination():
             assert actual_value == "", f"Поле 'Куда' не очистилось: '{actual_value}'"
     finally:
         driver.quit()
+
 
 @allure.title("Негативная проверка: Поля сбрасываются после обновления страницы")
 @allure.severity("minor")
@@ -114,7 +119,11 @@ def test_fields_reset_after_refresh():
             reset_origin_value = driver.find_element(*main_page.origin_locator).get_attribute("value")
             reset_destination_value = driver.find_element(*main_page.destination_locator).get_attribute("value")
 
-            assert reset_origin_value == initial_origin_value, f"Поле 'Откуда' не соответствует ожиданиям: '{reset_origin_value}' != '{initial_origin_value}'"
+            assert reset_origin_value == initial_origin_value, (
+                f"Поле 'Откуда' не соответствует ожиданиям: "
+                f"'{reset_origin_value}' != '{initial_origin_value}'"
+            )
+
             assert reset_destination_value == "", f"Поле 'Куда' не сбросилось: '{reset_destination_value}'"
     finally:
         driver.quit()
