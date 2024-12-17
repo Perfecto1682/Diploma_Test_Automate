@@ -31,6 +31,7 @@ pip install -r requirements.txt
 Для запуска тестов используйте pytest. Для выполнения всех тестов используйте следующую команду:
 
 pytest --alluredir=allure-results
+
 Для генерации отчетов в формате Allure выполните команду:
 
 allure serve allure-results
